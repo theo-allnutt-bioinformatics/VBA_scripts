@@ -1,0 +1,426 @@
+Attribute VB_Name = "Module1"
+
+Function splitit(mystring, delim, pos)
+Dim wrd() As String
+wrd() = Split(mystring, delim)
+
+splitit = wrd(pos)
+
+End Function
+
+
+
+Function splitit2(mystring, delim, stpos, enpos)
+Dim wrd() As String
+wrd() = Split(mystring, delim)
+For x = stpos To enpos
+splitit2 = splitit2 & delim & wrd(x)
+Next x
+End Function
+
+
+
+Public Function shannon1(x As Range, n)
+
+'calculate shannon diversity for a range of frequency values
+'=-1*(((B$1*LOG(B$1,2))+(((1-B$1)*LOG(1-B$1,2)))))
+'logprop = Math.Log(prop) / Math.Log(2)
+'n = base n
+
+For i = 1 To x.Count
+a = x.Item(i)
+If a <> 0 Then
+
+log2a = Math.Log(a) / Math.Log(n)
+
+plogp = a * log2a
+Else
+plogp = 0
+End If
+
+sumplogp = sumplogp + plogp
+
+Next i
+
+shannon1 = -1 * sumplogp
+
+
+End Function
+
+Public Function revcomp(x$)
+
+'make reverse compliment
+
+'test number of entries
+Dim t$, a, test, length, change, out$, c, G, tm
+'a = 0
+'For test = 1 To 5001
+'t$ = ActiveSheet.Cells(test, 1)
+'If t$ <> "" Then
+'a = a + 1
+'End If
+'Next test
+'change and output to next column
+'For work = 2 To a
+'x$ = ActiveSheet.Cells(1, 1)
+length = Len(x$)
+out$ = ""
+c = 0
+G = 0
+For change = 0 To length - 1
+'ActiveSheet.Cells(work, 5) = change + 1
+'ActiveSheet.Cells(work, 6) = Mid(x$, length - change, 1)
+If Mid(x$, length - change, 1) = "A" Then
+out$ = out$ + "T"
+End If
+If Mid(x$, length - change, 1) = "T" Then
+out$ = out$ + "A"
+End If
+If Mid(x$, length - change, 1) = "C" Then
+out$ = out$ + "G"
+c = c + 1
+End If
+If Mid(x$, length - change, 1) = "G" Then
+out$ = out$ + "C"
+G = G + 1
+End If
+If Mid(x$, length - change, 1) = "R" Then
+out$ = out$ + "Y"
+G = G + 0.5
+End If
+If Mid(x$, length - change, 1) = "Y" Then
+out$ = out$ + "R"
+G = G + 0.5
+End If
+If Mid(x$, length - change, 1) = "M" Then
+out$ = out$ + "K"
+G = G + 0.5
+End If
+If Mid(x$, length - change, 1) = "K" Then
+out$ = out$ + "M"
+G = G + 0.5
+End If
+If Mid(x$, length - change, 1) = "S" Then
+out$ = out$ + "S"
+G = G + 1
+End If
+If Mid(x$, length - change, 1) = "W" Then
+out$ = out$ + "W"
+End If
+If Mid(x$, length - change, 1) = "H" Then
+out$ = out$ + "D"
+G = G + 0.33
+End If
+If Mid(x$, length - change, 1) = "B" Then
+out$ = out$ + "V"
+G = G + 0.66
+End If
+If Mid(x$, length - change, 1) = "D" Then
+out$ = out$ + "H"
+G = G + 0.33
+End If
+If Mid(x$, length - change, 1) = "N" Then
+out$ = out$ + "N"
+G = G + 0.5
+End If
+If Mid(x$, length - change, 1) = "V" Then
+out$ = out$ + "B"
+G = G + 0.66
+End If
+tm = (59.9 + (41 * ((c + G) / length))) - (500 / length)
+
+'ActiveSheet.Cells(work, 7) = (change + 1) * 0.27
+'nb decomment next line to print reverse complement of sequence
+revcomp = out$
+Next change
+'GIVE NEW NAME TO REV COMP
+'ActiveSheet.Cells(work, 8) = Left(ActiveSheet.Cells(work, 6), Len(ActiveSheet.Cells(work, 6)) - 2) & "out"
+'ActiveSheet.Cells(work, 6) = tm
+'ActiveSheet.Cells(work, 5) = change
+'melting temp
+'Tm = 81.5 + 16.6 log [Na+] + 41(G + C)/length -500/length
+'Next work
+
+
+End Function
+
+Public Function Sort(ArrayIn, Ascending As Boolean)
+
+Dim SrtTemp As Variant
+Dim i As Long
+Dim j As Long
+
+
+If Ascending = True Then
+    For i = LBound(ArrayIn) To UBound(ArrayIn)
+         For j = i + 1 To UBound(ArrayIn)
+             If ArrayIn(i) > ArrayIn(j) Then
+                 SrtTemp = ArrayIn(j)
+                 ArrayIn(j) = ArrayIn(i)
+                 ArrayIn(i) = SrtTemp
+             End If
+         Next j
+     Next i
+Else
+    For i = LBound(ArrayIn) To UBound(ArrayIn)
+         For j = i + 1 To UBound(ArrayIn)
+             If ArrayIn(i) < ArrayIn(j) Then
+                 SrtTemp = ArrayIn(j)
+                 ArrayIn(j) = ArrayIn(i)
+                 ArrayIn(i) = SrtTemp
+             End If
+         Next j
+     Next i
+End If
+
+Sort = ArrayIn
+
+End Function
+
+Sub make_pop_graph()
+'
+
+'
+Dim popstart(1000)
+Dim popend(1000)
+
+Dim r1 As Range
+Dim group_address As String
+Dim r1_address As String
+
+Set G = Application.InputBox("select grouping column first cell", "Get Group Colum", Type:=8)
+Set r1 = Application.InputBox("select PCA1 column first cell", "Get PCA1 Column", Type:=8)
+
+group_address = G.Address
+r1_address = r1.Address
+m = splitit(group_address, "$", 1) ' Mid(group_address, 2, 1)
+p = splitit(r1.Address, "$", 1) 'Mid(r1.Address, 2, 1)
+group_col = Range(m & 1).Column
+pca1 = Range(p & 1).Column
+
+pca2 = pca1 + 1
+
+'group_col = 27
+num_pops = 0
+
+t = 1
+For x = 2 To 10000
+
+    a = Cells(x, group_col)
+    b = Cells(x - 1, group_col)
+    If a = "" Then GoTo 10
+    t = t + 1
+    If a <> b Then
+    num_pops = num_pops + 1
+    popstart(num_pops) = t
+   ' Cells(num_pops, 33) = popstart(num_pops)
+    
+    End If
+    
+    't = t + 1
+    popend(num_pops) = t
+   ' Cells(num_pops, 34) = popend(num_pops)
+    
+Next x
+
+10
+   ActiveSheet.Shapes.AddChart.Select
+    ActiveChart.ChartType = xlXYScatter
+    
+   Do Until ActiveChart.SeriesCollection.Count = 0
+        ActiveChart.SeriesCollection(1).Delete
+    Loop
+
+    
+    For p = 1 To num_pops
+    Randomize
+    red1 = Int(Rnd() * 255)
+    green1 = Int(Rnd() * 255)
+    blue1 = Int(Rnd() * 255)
+    'Cells(1, 15) = red1
+    'Cells(1, 16) = green1
+    'Cells(1, 17) = blue1
+    ActiveChart.SeriesCollection.NewSeries
+    ActiveChart.SeriesCollection(p).Name = Cells(popstart(p), group_col)
+    ActiveChart.SeriesCollection(p).XValues = Range(Cells(popstart(p), pca1), Cells(popend(p), pca1))
+    ActiveChart.SeriesCollection(p).Values = Range(Cells(popstart(p), pca2), Cells(popend(p), pca2))
+    ActiveChart.SeriesCollection(p).MarkerStyle = 8
+    ActiveChart.SeriesCollection(p).MarkerSize = 5
+
+    ActiveChart.SeriesCollection(p).Select
+    
+    ActiveChart.SeriesCollection(p).MarkerBackgroundColor = RGB(red1, green1, blue1)
+    ActiveChart.SeriesCollection(p).MarkerForegroundColor = RGB(red1, green1, blue1)
+    
+    'With Selection.Format.Fill.ForeColor
+        '.Visible = msoTrue
+        '.RGB = RGB(red1, green1, blue1)
+        '.Solid
+        '.Transparency = 0.2
+    'End With
+    'ActiveChart.SeriesCollection(p).Select
+    'With Selection.Format.Fill.BackgroundColor
+        '.Visible = msoTrue
+        '.RGB = RGB(red1, green1, blue1)
+        '.Solid
+        '.Transparency = 0.2
+    'End With
+    
+    Selection.Format.Line.Visible = msoFalse
+    
+    
+    
+    
+    
+    ActiveChart.SetElement (ElementLegendRight)
+    
+    Next p
+    'ActiveChart.Axes(xlValue).MinimumScaleIsAuto = True
+    'ActiveChart.Axes(xlValue).MaximumScaleIsAuto = True
+    
+
+End Sub
+
+Sub findbinary()
+Dim c
+Dim t
+t = 1
+input_col = 14
+output_col = 2
+end_genes = 15963
+end_blast = 14159
+
+ReDim genes(end_blast, 2)
+ReDim cds(end_genes)
+
+'MUST PUT HITS AND CDS IN SAME ORDER
+
+
+Worksheets("genes").Select
+c = 0
+For x = 2 To end_genes
+c = c + 1
+cds(c) = Cells(x, 1)
+Next x
+
+Worksheets("blast_hits").Select
+c = 0
+For y = 1 To end_blast
+c = c + 1
+genes(c, 2) = Cells(y, input_col) 'gene name
+genes(c, 1) = Cells(y, 1)   'cds id
+Next y
+
+Worksheets("genes").Select
+c = 0
+
+For i = 2 To end_genes
+c = c + 1
+    t = 0
+    d = 0
+    For j = 1 To end_blast
+        d = d + 1
+        If cds(c) = genes(d, 1) Then
+        Cells(i, output_col) = genes(j, 2)
+        Cells(i, output_col).Select
+        t = 1
+        GoTo 10
+        
+        End If
+    
+    Next j
+10
+    If t = 0 Then
+    Cells(c + 1, output_col) = "unknown cds"
+    End If
+    
+ Next i
+
+
+
+End Sub
+
+
+Sub everyother()
+c = 0
+For x = 1 To 80 Step 2
+c = c + 1
+Cells(c, 3) = Cells(x, 1)
+Cells(c, 4) = Cells(x + 1, 1)
+'Cells(c, 8) = Cells(x + 1, 3)
+
+Next x
+
+End Sub
+
+Sub everyother2()
+c = 0
+For x = 1 To 120 Step 2
+c = c + 1
+
+Cells(c, 5) = Cells(x, 2)
+Cells(c, 6) = Cells(x + 1, 3) + Cells(x, 3)
+
+Next x
+
+End Sub
+
+Sub delrows()
+
+'delete identical rows when they have been sorted
+
+c = 2
+col = 3
+Do
+If Cells(c, col) = "" Then GoTo 10
+If Cells(c, col) = Cells(c - 1, col) Then
+Rows(c).Select
+Selection.Delete Shift:=xlUp
+Else: c = c + 1
+End If
+Loop
+10
+
+End Sub
+
+Sub getname_fromlist()
+
+For x = 2 To 107
+a = Cells(x, 2)
+For y = 2 To 288
+b = Cells(y, 8)
+If InStr(b, a) Then
+Cells(x, 4) = b
+Exit For
+End If
+Next y
+Next x
+
+
+
+
+End Sub
+
+Sub sum_groups()
+
+Dim data(1000, 1)
+Dim keys(1000, 1)
+For x = 4 To 133
+
+If Cells(x, 1) <> Cells(x - 1, 1) Then
+c = c + 1
+keys(c, 1) = Cells(x, 1)
+End If
+
+data(Cells(x, 1), 1) = data(Cells(x, 1), 1) + Cells(x, 3)
+
+Next x
+
+For out = 1 To c:
+Cells(out, 5) = keys(out, 1)
+Cells(out, 6) = data(keys(out, 1), 1)
+Next out
+
+End Sub
+
+
